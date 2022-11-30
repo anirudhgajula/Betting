@@ -104,11 +104,4 @@ contract Betting is Ownable {
     require(_numPlayers == _maxNumPlayers, "Players have yet to deposit their NewToken funds");
     _;
   }
-
-  function checkBetterFunds(uint256 index) public view returns(uint256) {
-    if (_betters[index].betterAddress == address(0)) {
-      return 0;
-    }
-    return _betSize;
-  }
 }

@@ -48,7 +48,6 @@ describe("Testing Contract with 20 Persons", function() {
             await token.mint(betters[0].address, ethers.utils.parseUnits('1', '24'));
             await token.connect(betters[0]).approve(betting.address, ethers.utils.parseUnits('1', '24'));
             await betting.connect(betters[0]).addFunds(1);
-            expect (await betting.checkBetterFunds(0)).to.equal(ethers.utils.parseUnits('1', '24'));
             expect (await token.balanceOf(betters[0].address)).to.equal(0);
         });
         it("Should check one cannot bet more than once", async function() {
