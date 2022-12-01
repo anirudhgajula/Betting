@@ -2,31 +2,31 @@
 
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import "./NewToken.sol";
 
 contract Betting is Ownable {
   struct Better {
     address betterAddress;
+    uint256 bet;
     uint256 choice; // 1 implies player bet btc > $20,000 and 0 implies btc <= $20,000
   }
 
   address private _owner;
-  uint256 private _betSize;
   uint256 private _numPlayers;
   uint256 private _maxNumPlayers;
-  uint256 private _betIncrease;
+  uint256 private _betPool;
+  uint256 private _betIncreasePool;
   // Map of betters
   mapping (uint256 => Better) private _betters;
   NewToken private _token;
 
   // will be called when a new user starts the betting process
 
-  constructor (NewToken token, uint256 betSize, uint256 maxNumPlayers) {
+  constructor (NewToken token, uint256 maxNumPlayers) {
     _owner = payable(msg.sender);
     _token = token;
-    _betSize = betSize;
     _maxNumPlayers = maxNumPlayers;
   }
 
@@ -35,11 +35,21 @@ contract Betting is Ownable {
     All betters are forced to deposit the value of betSize initialised by the first user
     Each better can only bet once
    */
-  function addFunds(uint256 choice) public checkChoice(choice) checkBetters checkExisting(msg.sender) checkTransfer {
+  function addFunds(uint256 value, uint256 choice) public checkBetters checkExisting(msg.sender) {
     if (choice == 1) {
-      _betIncrease++;
+      _betIncreasePool += value;
+      _betPool += value;
     }
+    else if (choice == 0) {
+      _betPool += value;
+    }
+    else {
+      revert("Please ensure that you call addFunds with a choice value of either 1 or 0, where 1 implies higher than threshold and 0 implies lower");
+    }
+    require(_token.transferFrom(msg.sender, _owner, value), "Please ensure that you have sufficient NewToken");
+
     _betters[_numPlayers].betterAddress = msg.sender;
+    _betters[_numPlayers].bet = value;
     _betters[_numPlayers].choice = choice;
     
     _numPlayers++;
@@ -51,31 +61,33 @@ contract Betting is Ownable {
    */
 
   function disburseFunds(uint256 choice) public onlyOwner checkAllBetters {
-    uint256 totalFunds = _betSize * _maxNumPlayers;
-    uint counter;
+    uint256 sumCorrectBet;
     if (choice == 1) {
-      counter = _betIncrease;
+      sumCorrectBet = _betIncreasePool;
+    }
+    else if (choice == 0) {
+      sumCorrectBet = SafeMath.sub(_betPool, _betIncreasePool);
     }
     else {
-      counter = _maxNumPlayers - _betIncrease;
+      revert("Please ensure that you call disburseFunds with either 0 or 1, where 1 implies higher than threshold and 0 implies lower.");
     }
-    /* OpenZeppelin SafeMath module for division not used as validation
-       of integer underflow/overflow is done on language level for Solidity >= 0.8.0 */
-    uint256 disburse = totalFunds / counter;
+
+    /**
+      Multiplication by 1000 is done so that in case of values like 1.5659 for _betPool/sumCorrectBet, we have a closer approximation
+      i.e. it is scaled to 1565, multiplied by the amount bet by the better,
+      and then scaled down by 1000, resulting in a closer approximation compared to working with 1 or 15 or 156
+     */
+
+    uint256 weight = SafeMath.div(SafeMath.mul(_betPool, 1000), sumCorrectBet);
     for (uint256 i = 0; i < _maxNumPlayers; i++) {
       if (_betters[i].choice == choice) {
-        _token.transferFrom(_owner, _betters[i].betterAddress, disburse);
+        _token.transferFrom(_owner, _betters[i].betterAddress, SafeMath.div(SafeMath.mul(_betters[i].bet, weight), 1000));
       }
       _betters[i].betterAddress = address(0);
     }
     _numPlayers = 0;
-    _betIncrease = 0;
-  }
-
-  // best to use 0, 1 so that in future if more things need to be added on, we can go to 2, 3
-  modifier checkChoice(uint256 choice) {
-    require(choice == 1 || choice == 0);
-    _;
+    _betIncreasePool = 0;
+    _betPool = 0;
   }
 
   modifier checkBetters() {
@@ -94,14 +106,8 @@ contract Betting is Ownable {
     _;
   }
 
-  modifier checkTransfer() {
-    require(_token.transferFrom(msg.sender, _owner, _betSize), 
-    string(abi.encodePacked("Please ensure that you have enough NewToken and deposit ", Strings.toString(_betSize), "NT")));
-    _;
-  }
-
   modifier checkAllBetters() {
-    require(_numPlayers == _maxNumPlayers, "Players have yet to deposit their NewToken funds");
+    require(_numPlayers == _maxNumPlayers, "Betters have yet to deposit their NewToken funds");
     _;
   }
 }
