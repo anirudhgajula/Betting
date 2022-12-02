@@ -1,6 +1,7 @@
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 const { ethers } = require("hardhat");
 const { expect } = require("chai");
+const { HARDHAT_NETWORK_RESET_EVENT } = require("hardhat/internal/constants");
 
 describe("Testing Contract with 20 Persons - All Same Bet Size", function() {
     async function deployFixture() {
@@ -47,14 +48,18 @@ describe("Testing Contract with 20 Persons - All Same Bet Size", function() {
             const { betters, token, betting } = await loadFixture(deployFixture);
             await token.mint(betters[0].address, ethers.utils.parseUnits('1', '24'));
             await token.connect(betters[0]).approve(betting.address, ethers.utils.parseUnits('1', '24'));
-            await betting.connect(betters[0]).addFunds(ethers.utils.parseUnits('1', '24'), 1);
+            await betting.connect(betters[0]).addFunds(1, {
+                value: ethers.utils.parseUnits('1', '24')
+            });
             expect (await token.balanceOf(betters[0].address)).to.equal(0);
         });
         it("Should check one cannot bet more than once", async function() {
             const { betters, token, betting } = await loadFixture(deployFixture);
             await token.mint(betters[0].address, ethers.utils.parseUnits('2', '24'));
             await token.connect(betters[0]).approve(betting.address, ethers.utils.parseUnits('2', '24'));
-            await betting.connect(betters[0]).addFunds(ethers.utils.parseUnits('1', '24'), 1);
+            await betting.connect(betters[0]).addFunds(1, {
+                value: ethers.utils.parseUnits('1', '24')
+            });
             await expect(betting.connect(betters[0]).addFunds(ethers.utils.parseUnits('1', '24'), 1)).to.be.revertedWith("Better has placed a bet previously");
         });
     });
