@@ -71,6 +71,7 @@ contract Betting is Ownable {
     if (_token.balanceOf(msg.sender) < value) {
       revert("Please ensure that you have sufficient NewToken");
     }
+    
     _token.transferFrom(msg.sender, _owner, value);
     _betters[_numPlayers].betterAddress = msg.sender;
     _betters[_numPlayers].bet = value;
