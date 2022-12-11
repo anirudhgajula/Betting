@@ -10,7 +10,7 @@ async function main() {
     const Token = await ethers.getContractFactory("NewToken");
     const token = await Token.deploy();
     const Betting = await ethers.getContractFactory("Betting");
-    const betting = await Betting.deploy();
+    const betting = await Betting.deploy(token.address, 20);
     await betting.deployed();
 
     console.log("Token address:", token.address);
