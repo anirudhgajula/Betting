@@ -22,6 +22,27 @@ contract Betting is Ownable {
   mapping (uint256 => Better) private _betters;
   NewToken private _token;
 
+  modifier checkBetters() {
+    require(_numPlayers < _maxNumPlayers, "All betters deposited their funds already");
+    _;
+  }
+
+  modifier checkExisting(address newvoter) {
+    bool notBetted = true;
+    for (uint256 i = 0; i < _numPlayers; i++) {
+      if (_betters[i].betterAddress == newvoter) {
+        notBetted = false;
+      }
+    }
+    require(notBetted, "Better has placed a bet previously");
+    _;
+  }
+
+  modifier checkAllBetters() {
+    require(_numPlayers == _maxNumPlayers, "Betters have yet to deposit their NewToken funds");
+    _;
+  }
+
   // will be called when a new user starts the betting process
 
   constructor (NewToken token, uint256 maxNumPlayers) {
@@ -35,7 +56,7 @@ contract Betting is Ownable {
     All betters are forced to deposit the value of betSize initialised by the first user
     Each better can only bet once
    */
-  function addFunds(uint256 value, uint256 choice) public checkBetters checkExisting(msg.sender) {
+  function addFunds(uint256 value, uint256 choice) public payable checkBetters checkExisting(msg.sender) {
     if (choice == 1) {
       _betIncreasePool += value;
       _betPool += value;
@@ -46,8 +67,12 @@ contract Betting is Ownable {
     else {
       revert("Please ensure that you call addFunds with a choice value of either 1 or 0, where 1 implies higher than threshold and 0 implies lower");
     }
-    require(_token.transferFrom(msg.sender, _owner, value), "Please ensure that you have sufficient NewToken");
 
+    if (_token.balanceOf(msg.sender) < value) {
+      revert("Please ensure that you have sufficient NewToken");
+    }
+    
+    _token.transferFrom(msg.sender, _owner, value);
     _betters[_numPlayers].betterAddress = msg.sender;
     _betters[_numPlayers].bet = value;
     _betters[_numPlayers].choice = choice;
@@ -88,26 +113,5 @@ contract Betting is Ownable {
     _numPlayers = 0;
     _betIncreasePool = 0;
     _betPool = 0;
-  }
-
-  modifier checkBetters() {
-    require(_numPlayers < _maxNumPlayers, "All betters deposited their funds already");
-    _;
-  }
-
-  modifier checkExisting(address newvoter) {
-    bool notBetted = true;
-    for (uint256 i = 0; i < _numPlayers; i++) {
-      if (_betters[i].betterAddress == newvoter) {
-        notBetted = false;
-      }
-    }
-    require(notBetted, "Better has placed a bet previously");
-    _;
-  }
-
-  modifier checkAllBetters() {
-    require(_numPlayers == _maxNumPlayers, "Betters have yet to deposit their NewToken funds");
-    _;
   }
 }
