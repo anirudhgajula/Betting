@@ -97,11 +97,10 @@ contract Betting is Ownable {
       revert("Please ensure that you call disburseFunds with either 0 or 1, where 1 implies higher than threshold and 0 implies lower.");
     }
 
-    /**
-      Multiplication by 1000 is done so that in case of values like 1.5659 for _betPool/sumCorrectBet, we have a closer approximation
-      i.e. it is scaled to 1565, multiplied by the amount bet by the better,
-      and then scaled down by 1000, resulting in a closer approximation compared to working with 1 or 15 or 156
-     */
+    
+    //  Multiplication by 1000 is done so that in case of values like 1.5659 for _betPool/sumCorrectBet, we have a closer approximation
+    //  i.e. it is scaled to 1565, multiplied by the amount bet by the better,
+    //  and then scaled down by 1000, resulting in a closer approximation compared to working with 1 or 15 or 156
 
     uint256 weight = SafeMath.div(SafeMath.mul(_betPool, 1000), sumCorrectBet);
     for (uint256 i = 0; i < _maxNumPlayers; i++) {
