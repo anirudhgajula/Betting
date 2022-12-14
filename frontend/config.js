@@ -1,0 +1,2 @@
+export const bettingContractAddress = "0x6A5b8fA90C2A9Bd936c8b77775cf010Fa6b94D11"
+export const tokenContractAddress = "0x0533BFc325d1F6d18AAF399c1fb434a142B63aa8"
