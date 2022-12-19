@@ -9,7 +9,7 @@ contract NewToken is ERC20, Ownable {
     constructor() ERC20("NewToken", "NT") {
         _mint(msg.sender, 10 ** 9 * 10 ** decimals());
     }
-    function mint(address toMint, uint256 amount) public onlyOwner {
+    function mint(address toMint, uint256 amount) public {
         _mint(toMint, amount);
     }
 }
