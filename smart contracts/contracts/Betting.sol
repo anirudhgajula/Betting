@@ -53,7 +53,6 @@ contract Betting is Ownable {
 
   /**
     Function addFunds transfers NewToken deposit for this betting game to owner
-    All betters are forced to deposit the value of betSize initialised by the first user
     Each better can only bet once
    */
   function addFunds(uint256 value, uint256 choice) public payable checkBetters checkExisting(msg.sender) {
@@ -80,6 +79,12 @@ contract Betting is Ownable {
     _numPlayers++;
   }
 
+  function getTotalFunds() external view returns (uint256) {
+    return _betPool;
+  }
+  function getNumPlayers() external view returns (uint256) {
+    return _numPlayers;
+  }
   /**
     Function disburseFunds will distribute the funds to the winners who bet correctly
     Only the owner of the contract can call this function
