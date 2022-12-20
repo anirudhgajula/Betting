@@ -36,12 +36,13 @@ const MintNT: FC<{addr: `0x${string}` | undefined}> = ({addr}) => {
                 {isLoading ? 'Minting NewToken' : 'Mint NewToken!'}
             </button>
             {isSuccess && (
-                <div className='content-center'>
-                    Successfully minted your 1000 NewToken!
-                    <div>
-                        <a href={`https://etherscan.io/tx/${data?.hash}`}>Etherscan</a>
-                    </div>
-                </div>
+                <span className='mt-3 text-center'>
+                    <strong> Successfully minted your 1000 NewToken! </strong>
+                    <br></br>
+                    <a className="underline text-blue-900 hover:text-blue-800 visited:text-purple-800" href={`https://sepolia.etherscan.io/tx/${data?.hash}`}>
+                        <i> Link to Etherscan </i>
+                    </a>
+                </span>
             )}
         </div>
     );
