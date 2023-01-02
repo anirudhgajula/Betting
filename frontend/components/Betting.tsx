@@ -18,7 +18,8 @@ var options: {[name: string]: string} = {"yes": "1", "Yes": "1", "No": "0", "no"
 const Betting = () => {
     const [choice, setChoice] = useState("1");
     const [betsize, setBetSize] = useState("0");
-    const [debounceBetSize, setDebouncedValue] = useState(betsize);
+    const debounceBetSize = useDebounce(betsize, 500);
+    const [val, setVal] = useState("0");
 
     const [signer, setSigner] = useState<Signer>();
     const account = useAccount({
@@ -46,23 +47,26 @@ const Betting = () => {
 
     useEffect(() => {
         const timer = setTimeout(async() => {
-            console.log("MEOW");
             if (signer != undefined) {
-                await token?.approve(bettingContractAddress, ethers.utils.parseEther(betsize));
+                const tx1 = await token?.approve(bettingContractAddress, ethers.utils.parseEther(debounceBetSize));
+                const result = await tx1.wait();
+                if (result) {
+                    setVal(debounceBetSize);
+                }
             }
-            setDebouncedValue(betsize), 20000})
+        })
         return () => {
             clearTimeout(timer);
         }
-    }, [betsize]);
+    }, [debounceBetSize]);
 
     // Pass in 1000 NewTokens
     const {config}  = usePrepareContractWrite({
         address: bettingContractAddress,
         abi: Bet.abi,
         functionName: 'addFunds',
-        args: [ethers.utils.parseEther(debounceBetSize).toString(), choice],
-        enabled: Boolean(debounceBetSize),
+        args: [ethers.utils.parseEther(val).toString(), choice],
+        enabled: Boolean(val),
     });
 
     const { data, write } = useContractWrite(config)
@@ -73,7 +77,6 @@ const Betting = () => {
     const handleSubmit = (event:React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         write?.();
-        console.log('Submitted ✅');
     };
 
     return (
