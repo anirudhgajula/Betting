@@ -7,7 +7,7 @@ import NewToken from '../utils/NewToken.json'
 import { FC, useEffect, useState } from 'react'
 import { tokenContractAddress } from "../config.js"
 
-const MintNT: FC<{addr: `0x${string}` | undefined}> = ({addr}) => {
+const TokenBalance: FC<{addr: `0x${string}` | undefined}> = ({addr}) => {
     const {data} = useBalance({
         address: addr,
         token: tokenContractAddress,
@@ -32,4 +32,4 @@ const MintNT: FC<{addr: `0x${string}` | undefined}> = ({addr}) => {
     );
 };
 
-export default MintNT;
+export default TokenBalance;

@@ -15,6 +15,7 @@ import MintNT from '../components/MintNT';
 import { useState, useEffect } from 'react'
 import Betting from '../components/Betting';
 import TokenBalance from '../components/TokenBalance';
+import Oracle from '../components/Oracle';
 
 
 // const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -70,6 +71,7 @@ export default function HomePage() {
           <div>BTC Price</div>
           <div>US$16600</div>
         </div>
+        <Oracle/>
 
 
         <h3 className='font-bold text-l'>
