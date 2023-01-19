@@ -54,8 +54,6 @@ const Betting = () => {
                     console.log(result);
                     if (result) {
                         setVal(debounceBetSize);
-                        console.log(debounceBetSize);
-                        console.log(val);
                     }
                 } catch(exception) {
                     console.log("Please ensure limit has been approved before continuing");
@@ -82,8 +80,6 @@ const Betting = () => {
     });
 
     const handleSubmit = (event:React.FormEvent<HTMLFormElement>) => {
-        console.log(debounceBetSize);
-        console.log(val);
         // To prevent refreshing of the form and to ensure we stay on the same page
         event.preventDefault();
         try {

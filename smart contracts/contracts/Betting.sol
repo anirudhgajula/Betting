@@ -104,7 +104,18 @@ contract Betting is Ownable, AutomationCompatibleInterface {
    */
 
   function autodisburseFunds(uint256 choice) private {
-    if (_numPlayers == 0 || _betPool == 0) return;
+    // If everyone bets increase, _betPool = _betIncreasePool. If price falls (choice = 0), no one gets anything.
+    // Similarly, if everyone bets decrease, _betIncreasePool = 0 and no one gets anything.
+    if (_numPlayers == 0 || _betPool == 0 || (_betPool == _betIncreasePool && choice == 0) || (_betIncreasePool == 0 && choice == 1)) {
+      for (uint256 i = 0; i < _numPlayers; i++) {
+        _betters[i].betterAddress = address(0);
+      }
+      _numPlayers = 0;
+      _betIncreasePool = 0;
+      _betPool = 0;
+      return;
+    }
+
     uint256 sumCorrectBet;
     if (choice == 1) {
       sumCorrectBet = _betIncreasePool;
