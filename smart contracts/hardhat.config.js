@@ -13,7 +13,9 @@ module.exports = {
     },
     goerli: {
       url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
-      accounts: [GOERLI_PRIVATE_KEY]
+      accounts: [GOERLI_PRIVATE_KEY],
+      gas: 1000000000000000,
+      allowUnlimitedContractSize: true
     }
   }
 };

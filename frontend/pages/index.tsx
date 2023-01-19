@@ -16,6 +16,9 @@ import { useState, useEffect } from 'react'
 import Betting from '../components/Betting';
 import TokenBalance from '../components/TokenBalance';
 import Oracle from '../components/Oracle';
+import PredictVal from '../components/PredictVal';
+import UserDetails from '../components/UserDetails';
+import { connect } from 'http2';
 
 
 // const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -38,9 +41,10 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 export default function HomePage() {
   
   const {address} = useAccount();
-  const [mintedNT, setMintedNT] = useState(null);
-  const [currentAccount, setCurrentAccount] = useState('');
-	const [correctNetwork, setCorrectNetwork] = useState(false);
+  const [connected, setConnection] = useState(false);
+  useEffect(() => setConnection(String(address) !== "undefined"), [address]);
+
+
 
   return (
     <>
@@ -63,24 +67,19 @@ export default function HomePage() {
         <div className="flex justify-center mb-10 text-2xl rounded-lg hover:scale-105 transition-duration:100ms ease-in-out" >
           <ConnectButton />
         </div>
-        <MintNT addr={address}/>
-        <TokenBalance addr={address}/>
-
-
-        <div className='grid grid-cols-2 gap-2 mb-4 text-2xl font-bold justify-start items-centre'>
-          <div>BTC Price</div>
-          <div>US$16600</div>
-        </div>
-        <Oracle/>
-
-
-        <h3 className='font-bold text-l'>
-          Do you think the price of Bitcoin will exceed $17,000 by Sunday?
-        </h3>
-        <h4>
-          Yes or no, place bet below!
-        </h4>
-        <Betting />
+        <>
+        {connected && (
+          <>
+            <MintNT addr={address}/>
+            <TokenBalance addr={address}/>
+            <Oracle/>
+            <PredictVal/>
+            <UserDetails/>
+            <Betting/>
+          </>
+        )}
+        </>
+        
       </div>
     </>
     

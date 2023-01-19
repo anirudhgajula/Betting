@@ -3,10 +3,11 @@
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
+import "@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol";
 import "./NewToken.sol";
+import "./PriceBTC.sol";
 
-contract Betting is Ownable {
+contract Betting is Ownable, AutomationCompatibleInterface {
   struct Better {
     address betterAddress;
     uint256 bet;
@@ -15,17 +16,16 @@ contract Betting is Ownable {
 
   address private _owner;
   uint256 private _numPlayers;
-  uint256 private _maxNumPlayers;
   uint256 private _betPool;
   uint256 private _betIncreasePool;
+  uint256 private immutable _interval;
+  uint256 private _lastTimeStamp;
+  uint256 private _storedPrice;
+  uint256 private _betPrice;
   // Map of betters
   mapping (uint256 => Better) private _betters;
   NewToken private _token;
-
-  modifier checkBetters() {
-    require(_numPlayers < _maxNumPlayers, "All betters deposited their funds already");
-    _;
-  }
+  PriceBTC private _oracle;
 
   modifier checkExisting(address newvoter) {
     bool notBetted = true;
@@ -38,24 +38,23 @@ contract Betting is Ownable {
     _;
   }
 
-  modifier checkAllBetters() {
-    require(_numPlayers == _maxNumPlayers, "Betters have yet to deposit their NewToken funds");
-    _;
-  }
-
   // will be called when a new user starts the betting process
 
-  constructor (NewToken token, uint256 maxNumPlayers) {
+  constructor (address token, address oracle, uint256 refreshInterval) {
     _owner = payable(msg.sender);
-    _token = token;
-    _maxNumPlayers = maxNumPlayers;
+    _token = NewToken(token);
+    _oracle = PriceBTC(oracle);
+    _storedPrice = _oracle.getLatestPrice();
+    _betPrice = SafeMath.mul(SafeMath.div(_storedPrice, 10 ** 11) + 1, 10 ** 3);
+    _interval = refreshInterval;
+    _lastTimeStamp = block.timestamp;
   }
 
   /**
     Function addFunds transfers NewToken deposit for this betting game to owner
     Each better can only bet once
    */
-  function addFunds(uint256 value, uint256 choice) public payable checkBetters checkExisting(msg.sender) {
+  function addFunds(uint256 value, uint256 choice) public payable checkExisting(msg.sender) {
     if (choice == 1) {
       _betIncreasePool += value;
       _betPool += value;
@@ -71,7 +70,7 @@ contract Betting is Ownable {
       revert("Please ensure that you have sufficient NewToken");
     }
     
-    _token.transferFrom(msg.sender, _owner, value);
+    _token.transferFrom(msg.sender, address(this), value);
     _betters[_numPlayers].betterAddress = msg.sender;
     _betters[_numPlayers].bet = value;
     _betters[_numPlayers].choice = choice;
@@ -82,6 +81,20 @@ contract Betting is Ownable {
   function getTotalFunds() external view returns (uint256) {
     return _betPool;
   }
+  
+  function getUserBetChoice() external view returns (uint256, uint256) {
+    for (uint i = 0; i < _numPlayers; i++) {
+      if (msg.sender == _betters[i].betterAddress) {
+        return (_betters[i].bet, _betters[i].choice);
+      }
+    }
+    return (0, 0);
+  }
+
+  function getBetPrice() external view returns (uint256) {
+    return _betPrice;
+  }
+
   function getNumPlayers() external view returns (uint256) {
     return _numPlayers;
   }
@@ -90,7 +103,33 @@ contract Betting is Ownable {
     Only the owner of the contract can call this function
    */
 
-  function disburseFunds(uint256 choice) public onlyOwner checkAllBetters {
+  function autodisburseFunds(uint256 choice) private {
+    if (_numPlayers == 0 || _betPool == 0) return;
+    uint256 sumCorrectBet;
+    if (choice == 1) {
+      sumCorrectBet = _betIncreasePool;
+    }
+    else if (choice == 0) {
+      sumCorrectBet = SafeMath.sub(_betPool, _betIncreasePool);
+    }
+    
+    //  Multiplication by 1000 is done so that in case of values like 1.5659 for _betPool/sumCorrectBet, we have a closer approximation
+    //  i.e. it is scaled to 1565, multiplied by the amount bet by the better,
+    //  and then scaled down by 1000, resulting in a closer approximation compared to working with 1 or 15 or 156
+
+    uint256 weight = SafeMath.div(SafeMath.mul(_betPool, 1000), sumCorrectBet);
+    for (uint256 i = 0; i < _numPlayers; i++) {
+      if (_betters[i].choice == choice) {
+        _token.transfer(_betters[i].betterAddress, SafeMath.div(SafeMath.mul(_betters[i].bet, weight), 1000));
+      }
+      _betters[i].betterAddress = address(0);
+    }
+    _numPlayers = 0;
+    _betIncreasePool = 0;
+    _betPool = 0;
+  }
+
+  function disburseFunds(uint256 choice) public onlyOwner {
     uint256 sumCorrectBet;
     if (choice == 1) {
       sumCorrectBet = _betIncreasePool;
@@ -102,20 +141,38 @@ contract Betting is Ownable {
       revert("Please ensure that you call disburseFunds with either 0 or 1, where 1 implies higher than threshold and 0 implies lower.");
     }
 
-    
     //  Multiplication by 1000 is done so that in case of values like 1.5659 for _betPool/sumCorrectBet, we have a closer approximation
     //  i.e. it is scaled to 1565, multiplied by the amount bet by the better,
     //  and then scaled down by 1000, resulting in a closer approximation compared to working with 1 or 15 or 156
 
     uint256 weight = SafeMath.div(SafeMath.mul(_betPool, 1000), sumCorrectBet);
-    for (uint256 i = 0; i < _maxNumPlayers; i++) {
+    for (uint256 i = 0; i < _numPlayers; i++) {
       if (_betters[i].choice == choice) {
-        _token.transferFrom(_owner, _betters[i].betterAddress, SafeMath.div(SafeMath.mul(_betters[i].bet, weight), 1000));
+        _token.transfer(_betters[i].betterAddress, SafeMath.div(SafeMath.mul(_betters[i].bet, weight), 1000));
       }
       _betters[i].betterAddress = address(0);
     }
     _numPlayers = 0;
     _betIncreasePool = 0;
     _betPool = 0;
+  }
+
+  function checkUpkeep(bytes calldata /* checkData */) external view override returns (bool upkeepNeeded, bytes memory performData) {
+    upkeepNeeded = (block.timestamp - _lastTimeStamp) > _interval;
+    performData = "";
+    // We don't use the checkData in this example. The checkData is defined when the Upkeep was registered.
+  }
+  // Call PriceBTC to retrieve BTC to USD price
+  function performUpkeep(bytes calldata /* performData */) external override {
+    //We highly recommend revalidating the upkeep in the performUpkeep function
+    if ((block.timestamp - _lastTimeStamp) > _interval ) {
+      // look at output from _oracle and check if it's 1k more than initial price it first
+      _lastTimeStamp = block.timestamp;
+      uint256 choice = SafeMath.mul(_betPrice, 10 ** 8) <= _oracle.getLatestPrice() ? 1 : 0;
+      autodisburseFunds(choice);
+      _storedPrice = _oracle.getLatestPrice();
+      _betPrice = SafeMath.mul(SafeMath.div(_storedPrice, 10 ** 11) + 1, 10 ** 3);
+    }
+    // We don't use the performData in this example. The performData is generated by the Keeper's call to checkUpkeep function
   }
 }

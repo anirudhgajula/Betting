@@ -10,9 +10,13 @@ Documentation: https://docs.chain.link/data-feeds/price-feeds/api-reference#late
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract PriceBTC {
-    AggregatorV3Interface internal priceFeed = AggregatorV3Interface(0xA39434A63A52E749F02807ae27335515BA4b07F7);
-    function getLatestPrice() public view returns (int) {
+    AggregatorV3Interface internal immutable priceFeed;
+    constructor(address _priceFeed) {
+        priceFeed = AggregatorV3Interface(_priceFeed);
+    }
+    /* AggregatorV3Interface internal priceFeed = AggregatorV3Interface(0xA39434A63A52E749F02807ae27335515BA4b07F7);*/
+    function getLatestPrice() public view returns (uint256) {
         (,int price,,,) = priceFeed.latestRoundData();
-        return price;
+        return uint(price);
     }
 }
