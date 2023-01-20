@@ -1,7 +1,7 @@
 import { useAccount, useConnect, 
     useContract, useContractRead, 
     useContractWrite, usePrepareContractWrite, useNetwork, 
-    useWaitForTransaction, useSigner } from 'wagmi';
+    useWaitForTransaction, useSigner, useProvider } from 'wagmi';
 import useDebounce from './useDebounce'
 
 import { ethers, Signer } from 'ethers';
@@ -37,7 +37,7 @@ const Betting = () => {
           setSigner(undefined);
         }
       })();
-    }, [account?.connector]);
+    }, [account]);
 
     const token = useContract({
         address: tokenContractAddress,

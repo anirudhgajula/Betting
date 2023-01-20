@@ -21,7 +21,7 @@ const TokenBalance: FC<{addr: `0x${string}` | undefined}> = ({addr}) => {
     }, [data]);
 
     return (
-        <div className='flex items-center justify-center place-items-center mt-2 mb-4 gap-3 w-full'>
+        <div className='flex items-center justify-center place-items-center mt-2 mb-10 gap-3 w-full'>
             <span className='text-2xl align-middle font-bold'>
                 User Balance
             </span>

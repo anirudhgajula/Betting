@@ -16,6 +16,7 @@ import {
 import { mainnet, goerli, sepolia} from 'wagmi/chains';
 import { infuraProvider } from 'wagmi/providers/infura';
 import { publicProvider } from 'wagmi/providers/public';
+import NavBar from '../components/NavBar';
 
 const { chains, provider } = configureChains(
   [mainnet, goerli, sepolia],
@@ -38,10 +39,14 @@ const wagmiClient = createClient({
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <WagmiConfig client={wagmiClient}>
-      <RainbowKitProvider chains={chains}>
-        <Component {...pageProps} />
-      </RainbowKitProvider>
-    </WagmiConfig>
+    <div className="mx-auto bg-[#1c589d]">
+      <NavBar></NavBar>
+      <WagmiConfig client={wagmiClient}>
+        <RainbowKitProvider chains={chains}>
+          <Component {...pageProps} />
+        </RainbowKitProvider>
+      </WagmiConfig>
+    </div>
+    
   );
 }

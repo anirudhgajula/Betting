@@ -12,30 +12,23 @@ import PriceBTC from '../utils/PriceBTC.json';
 // function h3(props: HeaderProps) {
 //     return <div>{props.children}</div>;
 // };
-  
+function convertInitial(data: string) {
+    if (String(data) == "undefined") return 0;
+    return (Number(BigInt(data) / BigInt(10 ** 11)) + 1) * 10 ** 3;
+}
+
+function parserToken(data: string) {
+    if (String(data) == "undefined") return 0;
+    return BigInt(data) / BigInt(10 ** 18);
+}
 
 const PredictVal: FC<{}> = ({}) => {
-    function convertInitial(data: string) {
-        if (String(data) == "undefined") return 0;
-        return (Number(BigInt(data) / BigInt(10 ** 11)) + 1) * 10 ** 3;
-    }
 
-    function parserToken(data: string) {
-        if (String(data) == "undefined") return 0;
-        return BigInt(data) / BigInt(10 ** 18);
-    }
 
     const {data} = useContractRead({
         address: bettingContractAddress,
         abi: Betting.abi,
         functionName: 'getBetPrice',
-        watch: true,
-    });
-
-    const {data: initial} = useContractRead({
-        address: oracleContractAddress,
-        abi: PriceBTC.abi,
-        functionName: 'getLatestPrice',
         watch: true,
     });
 
@@ -53,26 +46,20 @@ const PredictVal: FC<{}> = ({}) => {
         watch: true,
     });
 
-    const [val, setVal] = useState(String(convertInitial(initial as string)));
+    const [val, setVal] = useState(String(data) == "undefined" ? "0" : String(data));
 
     useEffect(() => {
-        if (typeof data === 'string') {
-            setVal(String(data) == "undefined" ? "0" : String(data));
-        }
+        setVal(String(data) == "undefined" ? "0" : String(data));
     }, [data]);
     
     const [num2, setNum2] = useState(String(num) == "undefined" ? "0" : String(num));
     useEffect(() => {
-        if (typeof num === 'string') {
-            setNum2(String(num) == "undefined" ? "0" : String(num));
-        }
+        setNum2(String(num) == "undefined" ? "0" : String(num));
     }, [num]);
 
     const [size2, setSize2] = useState(String(size) == "undefined" ? "0" : String(parserToken(size as string)));
     useEffect(() => {
-        if (typeof size === 'string') {
-            setSize2(String(size) == "undefined" ? "0" : String(size));
-        }
+        setSize2(String(size) == "undefined" ? "0" : String(parserToken(size as string)));
     }, [size]);
 
     return (

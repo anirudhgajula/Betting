@@ -18,9 +18,7 @@ const Oracle: FC<{}> = ({}) => {
     }
 
     useEffect(() => {
-        if (typeof data === 'string') {
-            setVal(String(data) == "undefined" ? "0" : String(convert(data)));
-        }
+        setVal(String(data) == "undefined" ? "0" : String(convert(data as string)));
     }, [data]);
 
     return (
