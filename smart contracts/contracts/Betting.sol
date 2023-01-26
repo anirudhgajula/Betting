@@ -11,7 +11,7 @@ contract Betting is Ownable, AutomationCompatibleInterface {
   struct Better {
     address betterAddress;
     uint256 bet;
-    uint256 choice; // 1 implies player bet btc > $20,000 and 0 implies btc <= $20,000
+    uint256 choice; // 2 implies no change. 1 implies player bet btc price increases by 0.5% and 0 implies btc price decreases by 0.5%.
   }
 
   address private _owner;
@@ -21,7 +21,8 @@ contract Betting is Ownable, AutomationCompatibleInterface {
   uint256 private immutable _interval;
   uint256 private _lastTimeStamp;
   uint256 private _storedPrice;
-  uint256 private _betPrice;
+  uint256 private _upperThresh;
+  uint256 private _lowerThresh;
   // Map of betters
   mapping (uint256 => Better) private _betters;
   NewToken private _token;
@@ -45,7 +46,8 @@ contract Betting is Ownable, AutomationCompatibleInterface {
     _token = NewToken(token);
     _oracle = PriceBTC(oracle);
     _storedPrice = _oracle.getLatestPrice();
-    _betPrice = SafeMath.mul(SafeMath.div(_storedPrice, 10 ** 11) + 1, 10 ** 3);
+    _upperThresh = SafeMath.div(SafeMath.mul(SafeMath.div(_storedPrice, 10 ** 8), 1005), 1000);
+    _lowerThresh = SafeMath.div(SafeMath.mul(SafeMath.div(_storedPrice, 10 ** 8), 995), 1000);
     _interval = refreshInterval;
     _lastTimeStamp = block.timestamp;
   }
@@ -55,6 +57,10 @@ contract Betting is Ownable, AutomationCompatibleInterface {
     Each better can only bet once
    */
   function addFunds(uint256 value, uint256 choice) public payable checkExisting(msg.sender) {
+    if (_token.balanceOf(msg.sender) < value) {
+      revert("Please ensure that you have sufficient NewToken");
+    }
+
     if (choice == 1) {
       _betIncreasePool += value;
       _betPool += value;
@@ -64,10 +70,6 @@ contract Betting is Ownable, AutomationCompatibleInterface {
     }
     else {
       revert("Please ensure that you call addFunds with a choice value of either 1 or 0, where 1 implies higher than threshold and 0 implies lower");
-    }
-
-    if (_token.balanceOf(msg.sender) < value) {
-      revert("Please ensure that you have sufficient NewToken");
     }
     
     _token.transferFrom(msg.sender, address(this), value);
@@ -91,8 +93,8 @@ contract Betting is Ownable, AutomationCompatibleInterface {
     return (0, 0);
   }
 
-  function getBetPrice() external view returns (uint256) {
-    return _betPrice;
+  function getBetPrice() external view returns (uint256, uint256) {
+    return (_lowerThresh, _upperThresh);
   }
 
   function getNumPlayers() external view returns (uint256) {
@@ -106,8 +108,10 @@ contract Betting is Ownable, AutomationCompatibleInterface {
   function autodisburseFunds(uint256 choice) private {
     // If everyone bets increase, _betPool = _betIncreasePool. If price falls (choice = 0), no one gets anything.
     // Similarly, if everyone bets decrease, _betIncreasePool = 0 and no one gets anything.
-    if (_numPlayers == 0 || _betPool == 0 || (_betPool == _betIncreasePool && choice == 0) || (_betIncreasePool == 0 && choice == 1)) {
+    // Alternatively, if choice == 2, there is no significant change in latestPrice, so no one gets anything and all funds are returned back.
+    if (choice == 2 || _numPlayers == 0 || _betPool == 0 || (_betPool == _betIncreasePool && choice == 0) || (_betIncreasePool == 0 && choice == 1)) {
       for (uint256 i = 0; i < _numPlayers; i++) {
+        _token.transfer(_betters[i].betterAddress, _betters[i].bet);
         _betters[i].betterAddress = address(0);
       }
       _numPlayers = 0;
@@ -142,14 +146,28 @@ contract Betting is Ownable, AutomationCompatibleInterface {
 
   function disburseFunds(uint256 choice) public onlyOwner {
     uint256 sumCorrectBet;
-    if (choice == 1) {
+    // If everyone bets increase, _betPool = _betIncreasePool. If price falls (choice = 0), no one gets anything.
+    // Similarly, if everyone bets decrease, _betIncreasePool = 0 and no one gets anything.
+    // Alternatively, if choice == 2, there is no significant change in latestPrice, so no one gets anything and all funds are returned back.
+
+    if (choice == 2 || _numPlayers == 0 || _betPool == 0 || (_betPool == _betIncreasePool && choice == 0) || (_betIncreasePool == 0 && choice == 1)) {
+      for (uint256 i = 0; i < _numPlayers; i++) {
+        _token.transfer(_betters[i].betterAddress, _betters[i].bet);
+        _betters[i].betterAddress = address(0);
+      }
+      _numPlayers = 0;
+      _betIncreasePool = 0;
+      _betPool = 0;
+      return;
+    }
+    else if (choice == 1) {
       sumCorrectBet = _betIncreasePool;
     }
     else if (choice == 0) {
       sumCorrectBet = SafeMath.sub(_betPool, _betIncreasePool);
     }
     else {
-      revert("Please ensure that you call disburseFunds with either 0 or 1, where 1 implies higher than threshold and 0 implies lower.");
+      revert("Please ensure that you call disburseFunds with either 0, 1 or 2, where 2 implies no change, 1 implies higher and 0 implies lower.");
     }
 
     //  Multiplication by 1000 is done so that in case of values like 1.5659 for _betPool/sumCorrectBet, we have a closer approximation
@@ -168,22 +186,21 @@ contract Betting is Ownable, AutomationCompatibleInterface {
     _betPool = 0;
   }
 
-  function checkUpkeep(bytes calldata /* checkData */) external view override returns (bool upkeepNeeded, bytes memory performData) {
+  function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {
     upkeepNeeded = (block.timestamp - _lastTimeStamp) > _interval;
     performData = "";
-    // We don't use the checkData in this example. The checkData is defined when the Upkeep was registered.
   }
-  // Call PriceBTC to retrieve BTC to USD price
-  function performUpkeep(bytes calldata /* performData */) external override {
-    //We highly recommend revalidating the upkeep in the performUpkeep function
+
+  function performUpkeep(bytes calldata) external override {
     if ((block.timestamp - _lastTimeStamp) > _interval ) {
-      // look at output from _oracle and check if it's 1k more than initial price it first
       _lastTimeStamp = block.timestamp;
-      uint256 choice = SafeMath.mul(_betPrice, 10 ** 8) <= _oracle.getLatestPrice() ? 1 : 0;
-      autodisburseFunds(choice);
       _storedPrice = _oracle.getLatestPrice();
-      _betPrice = SafeMath.mul(SafeMath.div(_storedPrice, 10 ** 11) + 1, 10 ** 3);
+      uint256 choice = (SafeMath.div(_storedPrice, 10 ** 8) <= _lowerThresh) ? 0 :
+                       (SafeMath.div(_storedPrice, 10 ** 8) >= _upperThresh) ? 1 :
+                       2;
+      autodisburseFunds(choice);
+      _upperThresh = SafeMath.div(SafeMath.mul(SafeMath.div(_storedPrice, 10 ** 8), 1005), 1000);
+      _lowerThresh = SafeMath.div(SafeMath.mul(SafeMath.div(_storedPrice, 10 ** 8), 995), 1000);
     }
-    // We don't use the performData in this example. The performData is generated by the Keeper's call to checkUpkeep function
   }
 }

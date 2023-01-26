@@ -65,7 +65,7 @@ const PredictVal: FC<{}> = ({}) => {
     return (
         <>
             <h3 className='font-bold text-xl'>
-                Do you think the price of Bitcoin will exceed ${val.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} by Sunday?
+                Do you think the price of Bitcoin will exceed ${val.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} in 1 minute?
             </h3>
             <br></br>
             <h3 className='font-semibold text-l'>
