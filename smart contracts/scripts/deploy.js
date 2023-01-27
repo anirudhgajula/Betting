@@ -17,7 +17,7 @@ async function main() {
     */
 
     const Betting = await ethers.getContractFactory("Betting");
-    const betting = await Betting.deploy("0xFd89292AC3B9EFD5F187F35C449B1374520E38f2", "0x523E95FD6d4901b2C6Ea0Cf69135b4098B369f97", 120);
+    const betting = await Betting.deploy("0xFd89292AC3B9EFD5F187F35C449B1374520E38f2", "0x523E95FD6d4901b2C6Ea0Cf69135b4098B369f97", 60);
     await betting.deployed();
 
     console.log("Betting address:", betting.address);

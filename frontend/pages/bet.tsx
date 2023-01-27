@@ -70,10 +70,11 @@ export default function HomePage() {
         <>
         {connected && (
           <>
+            <TokenBalance addr={address}/>
             <Oracle/>
             <PredictVal/>
-            <UserDetails/>
             <Betting/>
+            <UserDetails/>
           </>
         )}
         </>

@@ -1,3 +1,3 @@
-export const bettingContractAddress = "0xAc6cc4c7B0B14eB9eB703d5dB2395E0C76a59e01"
+export const bettingContractAddress = "0x70A2ed73a1E5113f186F4e4dE8a6172f3e36574f"
 export const tokenContractAddress = "0xFd89292AC3B9EFD5F187F35C449B1374520E38f2"
 export const oracleContractAddress ="0x523E95FD6d4901b2C6Ea0Cf69135b4098B369f97"
