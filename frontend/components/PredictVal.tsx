@@ -73,11 +73,11 @@ const PredictVal: FC<{}> = ({}) => {
             </div>
             <br></br>
             <div className="grid grid-cols-2 gap-4 p-5">
+                <div className="bg-blue-600 text-blue-100 text-lg font-semibold text-center p-7 rounded-lg">
+                    Rise: You expect price to be higher than ${upThresh.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                </div>
                 <div className="bg-red-700 text-red-100 text-lg font-semibold text-center p-7 rounded-lg">
                     Fall: You expect price to be lower than ${lowThresh.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                </div>
-                <div className="bg-blue-700 text-blue-100 text-lg font-semibold text-center p-7 rounded-lg">
-                    Rise: You expect price to be higher than ${upThresh.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 </div>
             </div>
             <br></br>
