@@ -68,21 +68,21 @@ const PredictVal: FC<{}> = ({}) => {
     return (
         <>
             <div className="grid grid-cols-2 gap-4 p-5">
-                <div className="bg-green-600 text-green-100 text-2xl font-bold text-center p-10 rounded-lg hover:scale-105">{num2 == "1" ? `${num2} Player` : `${num2} Players`}</div>
-                <div className="bg-green-600 text-green-100 text-2xl font-bold text-center p-10 rounded-lg hover:scale-105">{`${size2} NT`}</div>
+                <div className="bg-blue-400 text-green-100 text-2xl font-bold text-center p-7 rounded-lg hover:scale-105">{num2 == "1" ? `${num2} Player` : `${num2} Players`}</div>
+                <div className="bg-blue-400 text-green-100 text-2xl font-bold text-center p-7 rounded-lg hover:scale-105">{`${size2} NT`}</div>
             </div>
             <br></br>
             <div className="grid grid-cols-2 gap-4 p-5">
-                <div className="bg-red-700 text-red-100 text-lg font-semibold text-center p-7 rounded-lg hover:scale-110">
-                    Below ${lowThresh.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}?
+                <div className="bg-red-700 text-red-100 text-lg font-semibold text-center p-7 rounded-lg">
+                    Fall: You expect price to be lower than ${lowThresh.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 </div>
-                <div className="bg-blue-700 text-blue-100 text-lg font-semibold text-center p-7 rounded-lg hover:scale-110">
-                    Exceed ${upThresh.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}?
+                <div className="bg-blue-700 text-blue-100 text-lg font-semibold text-center p-7 rounded-lg">
+                    Rise: You expect price to be higher than ${upThresh.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 </div>
             </div>
             <br></br>
             <h4 className="text-xl font-bold">
-                Yes or no, place bet below!
+                Rise or fall, approve and bet below!
             </h4>
         </>
         

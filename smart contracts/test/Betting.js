@@ -1,14 +1,9 @@
 const { loadFixture, time } = require("@nomicfoundation/hardhat-network-helpers");
 const { ethers } = require("hardhat");
 const { expect } = require("chai");
-const { BigNumber } = require("ethers");
 
 // Interval for Chainlink Automation
 const interval = 5;
-function floorPrecise(number, precision) {
-    var power = Math.pow(10, precision);
-    return Math.floor(number * power) / power;
-}
 
 describe("Testing Contract with 20 Persons - All Same Bet Size", function() {
     async function deployFixture() {

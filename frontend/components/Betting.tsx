@@ -134,11 +134,11 @@ const Betting = () => {
                     />
 
                     <button onClick={submitClick} name="Exceed" className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded ml-4">
-                        {isLoading ? `Submitting...` : approve ? `Exceed!` : `Approve`}
+                        {isLoading ? `Submitting...` : approve ? `Rise!` : `Approve`}
                     </button>
                     {approve ?
                         <button onClick ={submitClick} name ="Below" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-800 rounded ml-4">
-                            Below!
+                            Fall!
                         </button> : 
                         <></>
                     }
