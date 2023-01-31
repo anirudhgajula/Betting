@@ -39,7 +39,7 @@ const MintNT: FC<{addr: `0x${string}` | undefined}> = ({addr}) => {
                 <span className='mt-3 text-center'>
                     <strong> Successfully minted your 1000 NewToken! </strong>
                     <br></br>
-                    <a className="underline text-blue-900 hover:text-blue-800 visited:text-purple-800" href={`https://sepolia.etherscan.io/tx/${data?.hash}`}>
+                    <a className="underline text-blue-900 hover:text-blue-800 visited:text-purple-800" href={`https://goerli.etherscan.io/tx/${data?.hash}`}>
                         <i> Link to Etherscan </i>
                     </a>
                 </span>

@@ -151,7 +151,7 @@ const Betting = () => {
                 <span className='ml-3 mt-2 mb-2 text-center'>
                     <strong> Successfully placed your bet! </strong>
                     <br></br>
-                    <a className="underline text-blue-900 hover:text-blue-800 visited:text-purple-800" href={`https://sepolia.etherscan.io/tx/${data?.hash}`}>
+                    <a className="underline text-blue-900 hover:text-blue-800 visited:text-purple-800" href={`https://goerli.etherscan.io/tx/${data?.hash}`}>
                         <i> Link to Etherscan </i>
                     </a>
                 </span>
