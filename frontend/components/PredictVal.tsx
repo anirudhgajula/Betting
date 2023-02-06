@@ -1,21 +1,7 @@
-import { ReactNode, FC, useState, useEffect } from "react";
+import { FC, useState, useEffect } from "react";
 import { useContractRead } from "wagmi";
 import {bettingContractAddress} from "../config.js";
 import Betting from '../utils/Betting.json';
-import {oracleContractAddress} from "../config.js";
-import PriceBTC from '../utils/PriceBTC.json';
-
-// type HeaderProps = {
-//     children: ReactNode;
-// };
-
-// function h3(props: HeaderProps) {
-//     return <div>{props.children}</div>;
-// };
-function convertInitial(data: string) {
-    if (String(data) == "undefined") return 0;
-    return (Number(BigInt(data) / BigInt(10 ** 11)) + 1) * 10 ** 3;
-}
 
 function parserToken(data: string) {
     if (String(data) == "undefined") return 0;
@@ -49,10 +35,8 @@ const PredictVal: FC<{}> = ({}) => {
 
     useEffect(() => {
         setLowThresh(String(data) == "undefined" ? "0" : String((data as String[])[0]));
-    }, [data]);
-
-    useEffect(() => {
         setUpThresh(String(data) == "undefined" ? "0" : String((data as String[])[1]));
+
     }, [data]);
     
     const [num2, setNum2] = useState(String(num) == "undefined" ? "0" : String(num));

@@ -1,5 +1,4 @@
-import { goerli, useAccount, useContractRead, useContractWrite, usePrepareContractWrite,
-    useWaitForTransaction, useSigner } from 'wagmi';
+import { useAccount, useContractRead } from 'wagmi';
 
 
 import Betting from '../utils/Betting.json'

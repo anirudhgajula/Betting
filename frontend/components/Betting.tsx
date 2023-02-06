@@ -1,24 +1,17 @@
-import { useAccount, useConnect, 
-    useContract, useContractRead, 
-    useContractWrite, usePrepareContractWrite, useNetwork, 
-    useWaitForTransaction, useSigner, useProvider } from 'wagmi';
-import useDebounce from './useDebounce'
+import { useAccount, useContract,
+         useContractWrite, usePrepareContractWrite,
+         useWaitForTransaction } from 'wagmi';
 
 import { ethers, Signer } from 'ethers';
 
 import Bet from '../utils/Betting.json';
 import NewToken from '../utils/NewToken.json';
-import React, { useState, useEffect, FC, FormEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import {bettingContractAddress, tokenContractAddress} from "../config.js";
-import { time } from 'console';
-
-var options: {[name: string]: string} = {"yes": "1", "Yes": "1", "No": "0", "no": "0"};
-
 
 const Betting = () => {
     const [choice, setChoice] = useState("1");
     const [betsize, setBetSize] = useState("0");
-    const debounceBetSize = useDebounce(betsize, 500);
     const [val, setVal] = useState("0");
 
     const [signer, setSigner] = useState<Signer>();
@@ -45,26 +38,6 @@ const Betting = () => {
         signerOrProvider: signer
     });
 
-    // useEffect(() => {
-    //     const process = async () => {
-    //         if (signer != undefined) {
-    //             try {
-    //                 const tx1 = await token?.approve(bettingContractAddress, ethers.utils.parseEther(betsize));
-    //                 const result = await tx1.wait();
-    //                 console.log(result);
-    //                 if (result) {
-    //                     setVal(betsize);
-    //                     setApprove(true);
-    //                 }
-    //             } catch(exception) {
-    //                 console.log("Please ensure limit has been approved before continuing");
-    //             }
-    //         }
-    //     };
-    //     process();
-    // }, [betsize]);
-
-    // Pass in 1000 NewTokens
     const {config}  = usePrepareContractWrite({
         address: bettingContractAddress,
         abi: Bet.abi,
@@ -78,15 +51,6 @@ const Betting = () => {
         hash: data?.hash,
     });
 
-    const handleSubmit = (event:React.FormEvent<HTMLFormElement>) => {
-        // To prevent refreshing of the form and to ensure we stay on the same page
-        event.preventDefault();
-        try {
-            write?.();
-        } catch(exception) {
-            console.log("Please approve bet to continue");
-        }
-    };
     const [approve, setApprove] = useState(false);
     const submitClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();

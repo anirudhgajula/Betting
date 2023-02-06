@@ -1,9 +1,7 @@
-import { useBalance, useContractWrite, usePrepareContractWrite,
-    useWaitForTransaction } from 'wagmi';
+import { useBalance } from 'wagmi';
 
 import { BigNumber, ethers } from 'ethers'
 
-import NewToken from '../utils/NewToken.json'
 import { FC, useEffect, useState } from 'react'
 import { tokenContractAddress } from "../config.js"
 

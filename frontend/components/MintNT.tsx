@@ -8,7 +8,6 @@ import { FC } from 'react'
 import { tokenContractAddress } from "../config.js"
 
 const MintNT: FC<{addr: `0x${string}` | undefined}> = ({addr}) => {
-    // Pass in 1000 NewTokens
     const {config}  = usePrepareContractWrite({
         address: tokenContractAddress,
         abi: NewToken.abi,
