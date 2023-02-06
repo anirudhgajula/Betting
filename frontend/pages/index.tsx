@@ -1,32 +1,16 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useConnect, 
-         useContract, useContractRead, 
-         useContractWrite, usePrepareContractWrite, useNetwork, 
-         useWaitForTransaction } from 'wagmi';
-
-// Token Imports
-import { ethers } from 'ethers'
-import BettingContract from '../utils/Betting.json'
-import { bettingContractAddress } from '../config.js'
+import { useAccount } from 'wagmi';
 
 // React and NextJS Imports
 import Head from 'next/head'
 import MintNT from '../components/MintNT';
 import { useState, useEffect } from 'react'
-import Betting from '../components/Betting';
 import TokenBalance from '../components/TokenBalance';
-import Oracle from '../components/Oracle';
-import PredictVal from '../components/PredictVal';
-import UserDetails from '../components/UserDetails';
-import { connect } from 'http2';
 
 export default function HomePage() {
-  
   const {address} = useAccount();
   const [connected, setConnection] = useState(false);
   useEffect(() => setConnection(String(address) !== "undefined"), [address]);
-
-
 
   return (
     <>
@@ -57,9 +41,7 @@ export default function HomePage() {
           </>
         )}
         </>
-        
       </div>
     </>
-    
   )
 }

@@ -4,10 +4,6 @@ const { expect } = require("chai");
 
 // Interval for Chainlink Automation
 const interval = 5;
-function floorPrecise(number, precision) {
-    var power = Math.pow(10, precision);
-    return Math.floor(number * power) / power;
-}
 
 describe("Testing Contract with 20 Persons - All Same Bet Size", function() {
     async function deployFixture() {
@@ -74,7 +70,9 @@ describe("Testing Contract with 20 Persons - All Same Bet Size", function() {
         });
         it("Should return the correct betprice that has to be exceeded for BTC / USD price", async function() {
             const { betting } = await loadFixture(deployFixture);
-            expect (await betting.getBetPrice()).to.equal(18000);
+            const betThresholds = await betting.getBetPrice();
+            expect (betThresholds[0]).to.equal(17412);
+            expect (betThresholds[1]).to.equal(17587);
         });
         
         it("Should return correct amount bet by each user and the total bet pool", async function() {
@@ -121,12 +119,7 @@ describe("Testing Contract with 20 Persons - All Same Bet Size", function() {
             await time.increase(interval + 1);
             await betting.performUpkeep(checkData);
             for (let i = 0; i < 20; i++) {
-                if (i % 2 == 0) {
-                    expect(await token.balanceOf(betters[i].address)).to.equal(ethers.utils.parseUnits('2', '24'));
-                }
-                else {
-                    expect(await token.balanceOf(betters[i].address)).to.equal(0);
-                }
+                expect(await token.balanceOf(betters[i].address)).to.equal(ethers.utils.parseUnits('1', '24'));
             }
         });
     });
@@ -146,11 +139,11 @@ describe("Testing Contract with 20 Persons - All Same Bet Size", function() {
             }
             await betting.disburseFunds(0);
             for (let i = 0; i < 20; i++) {
-                if (i % 2 == 0) {
-                    expect(await token.balanceOf(betters[i].address)).to.equal(ethers.utils.parseUnits('2', '24'));
+                if (i % 2 == 1) {
+                    expect(await token.balanceOf(betters[i].address)).to.equal(ethers.utils.parseUnits('0', '24'));
                 }
                 else {
-                    expect(await token.balanceOf(betters[i].address)).to.equal(0);
+                    expect(await token.balanceOf(betters[i].address)).to.equal(ethers.utils.parseUnits('2', '24'));
                 }
             }
         });
@@ -213,12 +206,7 @@ describe("Testing Contract with 5 Persons - All Diff Bet Size", function() {
             await time.increase(interval + 1);
             await betting.performUpkeep(checkData);
             for (let i = 0; i < 5; i++) {
-                if (i % 2 == 1) {
-                    expect(await token.balanceOf(betters[i].address)).to.equal(0);
-                }
-                else {
-                    expect(await token.balanceOf(betters[i].address)).to.equal(ethers.utils.parseUnits((Math.round(1000 * (floorPrecise((1.0 * 5.0 / 3.0), 3) * (i + 1))) / 1000).toString(), '24'));
-                }
+                expect(await token.balanceOf(betters[i].address)).to.equal(ethers.utils.parseUnits((i + 1).toString(), '24'));
             }
         });
     });

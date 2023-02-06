@@ -1,4 +1,3 @@
-import Head from 'next/head';
 import { PropsWithChildren } from 'react';
 
 const Page: React.FC<PropsWithChildren> = ({children}) => {

@@ -1,5 +1,4 @@
-import { goerli, useAccount, useContractRead, useContractWrite, usePrepareContractWrite,
-    useWaitForTransaction, useSigner } from 'wagmi';
+import { useAccount, useContractRead } from 'wagmi';
 
 
 import Betting from '../utils/Betting.json'
@@ -53,12 +52,12 @@ const UserDetails: FC<{}> = ({}) => {
             {BetPlaced && (
                 <div className="flex items-center justify-center">
                     <div className="grid grid-cols-2 gap-4 p-5">
-                        <div className="text-lg text-center p-10 bg-green-600 rounded-lg">
+                        <div className="text-lg text-center p-10 bg-blue-500 rounded-lg">
                             <h1 className="tile-marker text-blue-800 text-center">Successfully placed a bet of <strong>{bet} NewTokens!</strong></h1>
                         </div>
-                        <div className="text-lg text-center p-10 bg-green-600 rounded-lg">
+                        <div className="text-lg text-center p-10 bg-blue-500 rounded-lg">
                             {choice == "1" && (
-                                <h1 className=" text-blue-800 text-center">You expect the BTC/USD price to <strong>Rise!</strong></h1>
+                                <h1 className=" text-blue-800 text-center">You expect the BTC/USD price to <strong>Exceed!</strong></h1>
                             )}
                             {choice == "0" && (
                                 <h1 className=" text-blue-900 test-center">You expect the BTC/USD price to <strong>Fall!</strong></h1>

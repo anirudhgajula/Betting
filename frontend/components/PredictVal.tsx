@@ -1,21 +1,7 @@
-import { ReactNode, FC, useState, useEffect } from "react";
+import { FC, useState, useEffect } from "react";
 import { useContractRead } from "wagmi";
 import {bettingContractAddress} from "../config.js";
 import Betting from '../utils/Betting.json';
-import {oracleContractAddress} from "../config.js";
-import PriceBTC from '../utils/PriceBTC.json';
-
-// type HeaderProps = {
-//     children: ReactNode;
-// };
-
-// function h3(props: HeaderProps) {
-//     return <div>{props.children}</div>;
-// };
-function convertInitial(data: string) {
-    if (String(data) == "undefined") return 0;
-    return (Number(BigInt(data) / BigInt(10 ** 11)) + 1) * 10 ** 3;
-}
 
 function parserToken(data: string) {
     if (String(data) == "undefined") return 0;
@@ -23,8 +9,6 @@ function parserToken(data: string) {
 }
 
 const PredictVal: FC<{}> = ({}) => {
-
-
     const {data} = useContractRead({
         address: bettingContractAddress,
         abi: Betting.abi,
@@ -45,11 +29,14 @@ const PredictVal: FC<{}> = ({}) => {
         functionName: 'getTotalFunds',
         watch: true,
     });
+    const [lowThresh, setLowThresh] = useState(String(data) == "undefined" ? "0" : String((data as String[])[0]));
+    const [upThresh, setUpThresh] = useState(String(data) == "undefined" ? "0" : String((data as String[])[1]));
 
-    const [val, setVal] = useState(String(data) == "undefined" ? "0" : String(data));
 
     useEffect(() => {
-        setVal(String(data) == "undefined" ? "0" : String(data));
+        setLowThresh(String(data) == "undefined" ? "0" : String((data as String[])[0]));
+        setUpThresh(String(data) == "undefined" ? "0" : String((data as String[])[1]));
+
     }, [data]);
     
     const [num2, setNum2] = useState(String(num) == "undefined" ? "0" : String(num));
@@ -64,13 +51,23 @@ const PredictVal: FC<{}> = ({}) => {
 
     return (
         <>
-            <h3 className='font-bold text-xl'>
-                Do you think the price of Bitcoin will exceed ${val.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} by Sunday?
-            </h3>
+            <div className="grid grid-cols-2 gap-4 p-5">
+                <div className="bg-blue-400 text-green-100 text-2xl font-bold text-center p-7 rounded-lg hover:scale-105">{num2 == "1" ? `${num2} Player` : `${num2} Players`}</div>
+                <div className="bg-blue-400 text-green-100 text-2xl font-bold text-center p-7 rounded-lg hover:scale-105">{`${size2} NT`}</div>
+            </div>
             <br></br>
-            <h3 className='font-semibold text-l'>
-                {num2 == "1" ? `There is ${num2} player who has bet ${size2} NewTokens.` : `There are ${num2} players who have bet ${size2} NewTokens`}
-            </h3>
+            <div className="grid grid-cols-2 gap-4 p-5">
+                <div className="bg-blue-600 text-blue-100 text-lg font-semibold text-center p-7 rounded-lg">
+                    Rise: You expect price to be higher than ${upThresh.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                </div>
+                <div className="bg-red-700 text-red-100 text-lg font-semibold text-center p-7 rounded-lg">
+                    Fall: You expect price to be lower than ${lowThresh.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                </div>
+            </div>
+            <br></br>
+            <h4 className="text-xl font-bold">
+                Rise or fall, approve and bet below!
+            </h4>
         </>
         
     );

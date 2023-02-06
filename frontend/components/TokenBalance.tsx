@@ -1,9 +1,7 @@
-import { useBalance, useContractWrite, usePrepareContractWrite,
-    useWaitForTransaction } from 'wagmi';
+import { useBalance } from 'wagmi';
 
 import { BigNumber, ethers } from 'ethers'
 
-import NewToken from '../utils/NewToken.json'
 import { FC, useEffect, useState } from 'react'
 import { tokenContractAddress } from "../config.js"
 
@@ -21,11 +19,11 @@ const TokenBalance: FC<{addr: `0x${string}` | undefined}> = ({addr}) => {
     }, [data]);
 
     return (
-        <div className='flex items-center justify-center place-items-center mt-2 mb-10 gap-3 w-full'>
-            <span className='text-2xl align-middle font-bold'>
+        <div className='flex items-center justify-center place-items-center mt-2 gap-3 w-full'>
+            <span className='text-3xl align-middle font-bold'>
                 User Balance
             </span>
-            <span className='text-2xl align-middle font-medium'>
+            <span className='text-3xl align-middle font-medium'>
                 {val.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} NT
             </span>
         </div>
