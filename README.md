@@ -1,6 +1,6 @@
 ## Betting Contract
 
-This is a simple project using ERC20 token and a betting contract for 20 betters
+This is a simple project using ERC20 token and a betting contract to automatically process bets.
 
 NewToken is a standard ERC20 token.
 
