@@ -1,6 +1,5 @@
 /node_modules
 /yarn.lock
 /.env
-/smart\ contracts/cache
-/smart\ contracts/artifacts/contracts
-/smart\ contracts/artifacts/build-info
+/smart\ contracts/cache/
+/smart\ contracts/artifacts/
