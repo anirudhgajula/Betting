@@ -33,17 +33,17 @@ const UserDetails: FC<{}> = ({}) => {
 
     const [bet, setBet] = useState(parseBet(data as string[]));
     const [choice, setChoice] = useState(parseChoice(data as string[]));
-    var BetPlaced: boolean = bet !== "0";
+    const [BetPlaced, setBetPlaced] = useState(bet !== "0");
 
     useEffect(() => {
         setBet(parseBet(data as string[]));
         setChoice(parseChoice(data as string[]));
         if (bet !== "0") {
             console.log(bet);
-            BetPlaced = true;
+            setBetPlaced(true);
         }
         else {
-            BetPlaced = false;
+            setBetPlaced(false);
         }
     }, [data]);
 

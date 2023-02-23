@@ -9,6 +9,8 @@ import TokenBalance from '../components/TokenBalance';
 import Oracle from '../components/Oracle';
 import PredictVal from '../components/PredictVal';
 import UserDetails from '../components/UserDetails';
+import Image from 'next/image';
+import HeaderPage from '../public/HeaderPage.png';
 
 export default function HomePage() {
   const {address} = useAccount();
@@ -24,14 +26,15 @@ export default function HomePage() {
       </Head>
       <div className='flex flex-col items-center pt-4 bg-[#1c589d] min-h-full'>
         <div className='transition hover:rotate-180 transition-duration:100ms ease-in-out scale-75'>
-          <img
-            src="/HeaderPage.png"
-            className='max-w-xs h-auto transition-shadow hover:shadow-xl'
+          <Image
+            src={HeaderPage}
             alt=""
+            width={500}
+            height={350}
           />
         </div>
-        <h2 className='text-3xl font-bold mb-4 text-[#ada6c1]'>
-            Predict BTC's Future!
+        <h2 className="text-3xl font-bold mb-4 text-[#ada6c1]">
+          Predict BTC&apos;s Future!
         </h2>
         <div className="flex justify-center mb-4 text-2xl rounded-lg hover:scale-105 transition-duration:100ms ease-in-out" >
           <ConnectButton />
