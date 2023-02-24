@@ -1,6 +1,6 @@
 ## Betting Contract
 
-This is a simple project using ERC20 token and a betting contract to automatically process bets.
+This project involves a betting contract that automatically processes bets denominated in an ERC20 token. Motivated by PancakeSwap Prediction on Binance Chain.
 
 NewToken is a standard ERC20 token.
 
