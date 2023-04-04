@@ -1,0 +1,11 @@
+version: "2.15.1"
+
+services:
+  app:
+    container_name: docker-next-contain
+    image: docker-next-image
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
